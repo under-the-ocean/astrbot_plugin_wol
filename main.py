@@ -69,13 +69,23 @@ class WolPlugin(Star):
         except Exception as e:
             logger.error(f"[WOL] 保存设备数据失败: {e}")
 
-    def _safe_int(self, value: Any, default: int = 0) -> int:
+    def _safe_int(self, value: Any, default: int = 0, min_value: Optional[int] = None) -> int:
         try:
             if value is None or value == "":
                 return default
-            return int(value)
+            result = int(value)
+            if min_value is not None and result < min_value:
+                return default
+            return result
         except Exception:
             return default
+
+    def _safe_port(self, value: Any, default: Optional[int] = None) -> int:
+        default_port = default if default is not None else self.default_port
+        port = self._safe_int(value, default_port, min_value=1)
+        if port > 65535:
+            return default_port
+        return port
 
     def _next_id(self) -> int:
         max_id = 0
@@ -164,7 +174,7 @@ class WolPlugin(Star):
     async def _send_wol(self, mac: str, broadcast: str, port: int):
         """发送魔术包。修复：绑定 0.0.0.0:0 避免 Invalid argument。"""
         packet = self._create_magic_packet(mac)
-        port = self._safe_int(port, self.default_port)
+        port = self._safe_port(port, self.default_port)
         if not broadcast or not broadcast.strip():
             broadcast = self.default_broadcast
 
@@ -182,7 +192,7 @@ class WolPlugin(Star):
 
     def _device_line(self, d: Dict[str, Any]) -> str:
         broadcast = d.get("broadcast") or self.default_broadcast
-        port = d.get("port") or self.default_port
+        port = self._safe_port(d.get("port"), self.default_port)
         line = f"• {d.get('name')}: {d.get('mac')} ({broadcast}:{port})"
         if d.get("description"):
             line += f" - {d.get('description')}"
@@ -206,7 +216,7 @@ class WolPlugin(Star):
 
         d = devices[0]
         broadcast = d.get("broadcast") or self.default_broadcast
-        port = self._safe_int(d.get("port"), self.default_port)
+        port = self._safe_port(d.get("port"), self.default_port)
         try:
             await self._send_wol(str(d.get("mac")), str(broadcast), port)
             yield event.plain_result(f'✅ 已发送唤醒信号到 "{d.get("name")}" ({d.get("mac")})')
@@ -244,7 +254,7 @@ class WolPlugin(Star):
             "name": name,
             "mac": self._normalize_mac(mac),
             "broadcast": broadcast or "",
-            "port": self._safe_int(port, 0),
+            "port": self._safe_port(port, self.default_port),
             "description": description or "",
         }
         self._devices.append(device)
