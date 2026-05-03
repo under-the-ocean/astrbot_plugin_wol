@@ -1,0 +1,7 @@
+name: astrbot_plugin_wol
+display_name: WOL 网络唤醒
+desc: AstrBot Wake-on-LAN 网络唤醒插件，支持多设备管理、广播地址/端口配置与用户隔离
+author: under-the-ocean
+version: v1.0.0
+repo: https://github.com/under-the-ocean/astrbot_plugin_wol
+configurable: true

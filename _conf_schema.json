@@ -1,0 +1,34 @@
+{
+  "default_port": {
+    "description": "默认 WOL 端口，常用 7 或 9",
+    "type": "int",
+    "default": 9,
+    "hint": "魔术包发送端口，多数设备使用 9，少数可尝试 7。",
+    "min": 1,
+    "max": 65535
+  },
+  "default_broadcast": {
+    "description": "默认广播地址，局域网常用 255.255.255.255 或 192.168.x.255",
+    "type": "string",
+    "default": "255.255.255.255",
+    "hint": "魔术包默认广播地址。常见为 255.255.255.255 或目标网段广播地址，如 192.168.1.255。"
+  },
+  "user_isolation": {
+    "description": "启用用户隔离：每个用户只能管理自己的设备",
+    "type": "bool",
+    "default": true,
+    "hint": "强烈建议开启。开启后以 平台名+发送者ID 作为设备所有者，同一用户在私聊/群聊共用自己的设备，不同用户不可见。"
+  },
+  "allow_legacy_global_devices": {
+    "description": "兼容旧数据：允许读取未绑定用户的全局设备",
+    "type": "bool",
+    "default": false,
+    "hint": "仅用于兼容没有 ownerKey/userId 的旧数据。开启后用户没有同名设备时，才会读取全局旧设备。"
+  },
+  "show_owner_key": {
+    "description": "调试：列表中显示设备所有者标识",
+    "type": "bool",
+    "hint": "用于确认用户识别和隔离是否正确。平时建议关闭，避免暴露平台和用户ID。",
+    "default": false
+  }
+}
